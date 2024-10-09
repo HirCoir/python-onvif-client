@@ -4,11 +4,11 @@
 <h2 class="text-2xl font-bold mb-4">Dashboard de Videos</h2>
 <div id="videoGrid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
     {% for video in videos %}
-    <div class="bg-white shadow-md rounded-lg overflow-hidden relative video-item" data-name="{{ video.nombre }}">
+    <div class="bg-white shadow-md rounded-lg overflow-hidden relative video-item" data-path="{{ video.nombre }}">
         <div class="p-4">
             <h3 class="font-bold text-lg mb-2 truncate">{{ video.nombre }}</h3>
             {% if video.vista_previa %}
-            <img src="{{ url_for('serve_preview', filename=video.vista_previa) }}" alt="Vista previa de {{ video.nombre }}" class="w-full h-32 object-cover mb-2 cursor-pointer" onclick="openVideoPopup('{{ url_for('serve_video', filename=video.nombre) }}')">
+            <img src="data:image/jpeg;base64,{{ video.vista_previa }}" alt="Vista previa de {{ video.nombre }}" class="w-full h-32 object-cover mb-2 cursor-pointer" onclick="openVideoPopup('{{ url_for('serve_video', filename=video.nombre) }}')">
             {% else %}
             <div class="w-full h-32 bg-gray-200 flex items-center justify-center mb-2">
                 <span class="text-gray-500">Vista previa no disponible</span>
@@ -21,41 +21,47 @@
     {% endfor %}
 </div>
 
-<!-- Paginación -->
-<div id="pagination" class="mt-8 flex justify-center">
-    <nav class="relative z-0 inline-flex rounded-md shadow-sm -space-x-px" aria-label="Pagination">
-        {% if page > 1 %}
-        <a href="{{ url_for('index', page=page-1) }}" class="relative inline-flex items-center px-2 py-2 rounded-l-md border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50">
-            <span class="sr-only">Previous</span>
-            <!-- Heroicon name: solid/chevron-left -->
-            <svg class="h-5 w-5" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
-                <path fill-rule="evenodd" d="M12.707 5.293a1 1 0 010 1.414L9.414 10l3.293 3.293a1 1 0 01-1.414 1.414l-4-4a1 1 0 010-1.414l4-4a1 1 0 011.414 0z" clip-rule="evenodd" />
-            </svg>
-        </a>
-        {% endif %}
-        
-        {% for p in range(1, total_pages + 1) %}
-        <a href="{{ url_for('index', page=p) }}" class="relative inline-flex items-center px-4 py-2 border border-gray-300 bg-white text-sm font-medium {% if p == page %}text-blue-600 bg-blue-50{% else %}text-gray-700 hover:bg-gray-50{% endif %}">
-            {{ p }}
-        </a>
-        {% endfor %}
-        
-        {% if page < total_pages %}
-        <a href="{{ url_for('index', page=page+1) }}" class="relative inline-flex items-center px-2 py-2 rounded-r-md border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50">
-            <span class="sr-only">Next</span>
-            <!-- Heroicon name: solid/chevron-right -->
-            <svg class="h-5 w-5" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
-                <path fill-rule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clip-rule="evenodd" />
-            </svg>
-        </a>
-        {% endif %}
-    </nav>
+<div class="mt-8 flex justify-center">
+    {% if total_pages > 1 %}
+        <nav class="relative z-0 inline-flex rounded-md shadow-sm -space-x-px" aria-label="Pagination">
+            {% if page > 1 %}
+                <a href="{{ url_for('index', page=page-1) }}" class="relative inline-flex items-center px-2 py-2 rounded-l-md border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50">
+                    <span class="sr-only">Previous</span>
+                    <!-- Heroicon name: solid/chevron-left -->
+                    <svg class="h-5 w-5" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+                        <path fill-rule="evenodd" d="M12.707 5.293a1 1 0 010 1.414L9.414 10l3.293 3.293a1 1 0 01-1.414 1.414l-4-4a1 1 0 010-1.414l4-4a1 1 0 011.414 0z" clip-rule="evenodd" />
+                    </svg>
+                </a>
+            {% endif %}
+            
+            {% for num in range(1, total_pages + 1) %}
+                <a href="{{ url_for('index', page=num) }}" class="relative inline-flex items-center px-4 py-2 border border-gray-300 bg-white text-sm font-medium text-gray-700 hover:bg-gray-50 {% if num == page %}bg-blue-50 text-blue-600{% endif %}">
+                    {{ num }}
+                </a>
+            {% endfor %}
+            
+            {% if page < total_pages %}
+                <a href="{{ url_for('index', page=page+1) }}" class="relative inline-flex items-center px-2 py-2 rounded-r-md border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50">
+                    <span class="sr-only">Next</span>
+                    <!-- Heroicon name: solid/chevron-right -->
+                    <svg class="h-5 w-5" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+                        <path fill-rule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clip-rule="evenodd" />
+                    </svg>
+                </a>
+            {% endif %}
+        </nav>
+    {% endif %}
 </div>
 
 <div id="contextMenu" class="hidden fixed bg-white border border-gray-300 shadow-md rounded-md overflow-hidden z-50">
     <button onclick="showRenamePopup()" class="w-full text-left px-4 py-2 hover:bg-gray-100">Renombrar</button>
-    <button onclick="deleteVideo()" class="w-full text-left px-4 py-2 hover:bg-gray-100 text-red-600">Eliminar</button>
+    <form id="deleteForm" action="{{ url_for('delete_video') }}" method="POST">
+        <input type="hidden" name="video_path" id="deleteVideoPath">
+        <button type="submit" class="w-full text-left px-4 py-2 hover:bg-gray-100 text-red-600">Eliminar</button>
+    </form>
     <a id="downloadLink" href="#" class="block px-4 py-2 hover:bg-gray-100 text-green-600">Descargar</a>
+    <button onclick="showVideoInfo()" class="w-full text-left px-4 py-2 hover:bg-gray-100">Información</button>
+    <button onclick="showTimeline()" class="w-full text-left px-4 py-2 hover:bg-gray-100">Línea de tiempo</button>
 </div>
 
 <div id="renamePopup" class="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full hidden z-50">
@@ -63,9 +69,9 @@
         <div class="mt-3 text-center">
             <h3 class="text-lg leading-6 font-medium text-gray-900">Renombrar video</h3>
             <div class="mt-2 px-7 py-3">
-                <form id="renameForm" onsubmit="renameVideo(event)">
-                    <input type="hidden" id="oldNameInput">
-                    <input type="text" id="newNameInput" placeholder="Nuevo nombre" class="w-full p-2 border rounded mb-3">
+                <form id="renameForm" action="{{ url_for('rename_video') }}" method="POST">
+                    <input type="hidden" name="old_path" id="oldVideoPath">
+                    <input type="text" name="nuevo_nombre" id="newNameInput" placeholder="Nuevo nombre" class="w-full p-2 border rounded mb-3">
                     <button type="submit" class="px-4 py-2 bg-blue-500 text-white text-base font-medium rounded-md shadow-sm hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-300">
                         Renombrar
                     </button>
@@ -77,20 +83,36 @@
                 </button>
             </div>
         </div>
+    </div></div>
+
+<div id="videoInfoPopup" class="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full hidden z-50">
+    <div class="relative top-20 mx-auto p-5 border w-96 shadow-lg rounded-md bg-white">
+        <div class="mt-3 text-center">
+            <h3 class="text-lg leading-6 font-medium text-gray-900">Información del video</h3>
+            <div id="videoInfoContent" class="mt-2 px-7 py-3 text-left">
+                <!-- El contenido se llenará dinámicamente -->
+            </div>
+            <div class="items-center px-4 py-3">
+                <button onclick="closeVideoInfoPopup()" class="px-4 py-2 bg-blue-500 text-white text-base font-medium rounded-md shadow-sm hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-300">
+                    Cerrar
+                </button>
+            </div>
+        </div>
     </div>
 </div>
 
 <script>
-let currentVideoName = null;
-let selectedVideoElement = null;
+let currentVideoPath = null;
 let longPressTimer;
 const longPressDuration = 500; // milliseconds
+let contextMenuVisible = false;
 
-function showContextMenu(event, videoName) {
+function showContextMenu(event, videoPath) {
     event.preventDefault();
-    currentVideoName = videoName;
+    currentVideoPath = videoPath;
     const contextMenu = document.getElementById('contextMenu');
     contextMenu.style.display = 'block';
+    contextMenuVisible = true;
     
     // Position the menu near the touch point or mouse click
     const touchX = event.touches ? event.touches[0].clientX : event.clientX;
@@ -99,54 +121,137 @@ function showContextMenu(event, videoName) {
     contextMenu.style.left = `${touchX}px`;
     contextMenu.style.top = `${touchY}px`;
 
-    document.getElementById('downloadLink').href = `{{ url_for('download_video', filename='') }}${videoName}`;
+    document.getElementById('deleteVideoPath').value = videoPath;
+    document.getElementById('downloadLink').href = `{{ url_for('download_video', filename='') }}${videoPath}`;
 
-    document.addEventListener('click', hideContextMenu);
-    document.addEventListener('touchstart', hideContextMenu);
+    // Usar setTimeout para permitir que el evento de toque se propague antes de agregar los listeners
+    setTimeout(() => {
+        document.addEventListener('click', hideContextMenu);
+        document.addEventListener('touchstart', hideContextMenu);
+    }, 0);
 }
 
-function hideContextMenu() {
-    document.getElementById('contextMenu').style.display = 'none';
-    document.removeEventListener('click', hideContextMenu);
-    document.removeEventListener('touchstart', hideContextMenu);
+function hideContextMenu(event) {
+    const contextMenu = document.getElementById('contextMenu');
+    if (!contextMenu.contains(event.target) && contextMenuVisible) {
+        contextMenu.style.display = 'none';
+        contextMenuVisible = false;
+        document.removeEventListener('click', hideContextMenu);
+        document.removeEventListener('touchstart', hideContextMenu);
+    }
 }
 
 function showRenamePopup() {
-    hideContextMenu();
+    hideContextMenu({ target: document.body });
     const popup = document.getElementById('renamePopup');
     popup.style.display = 'block';
-    document.getElementById('oldNameInput').value = currentVideoName;
-    document.getElementById('newNameInput').value = currentVideoName;
+    document.getElementById('oldVideoPath').value = currentVideoPath;
+    document.getElementById('newNameInput').value = currentVideoPath.split('/').pop();
 }
 
 document.getElementById('closeRenamePopup').addEventListener('click', function() {
     document.getElementById('renamePopup').style.display = 'none';
 });
 
-function selectVideo(element) {
-    if (selectedVideoElement) {
-        selectedVideoElement.classList.remove('ring-2', 'ring-blue-500');
-    }
-    selectedVideoElement = element;
-    element.classList.add('ring-2', 'ring-blue-500');
-    currentVideoName = element.dataset.name;
-}
-
-function renameVideo(event) {
-    event.preventDefault();
-    const oldName = document.getElementById('oldNameInput').value;
-    const newName = document.getElementById('newNameInput').value;
-    fetch('{{ url_for('rename_video') }}', {
+function showVideoInfo() {
+    hideContextMenu({ target: document.body });
+    const popup = document.getElementById('videoInfoPopup');
+    popup.style.display = 'block';
+    
+    // Obtener la información del video
+    fetch('{{ url_for('get_video_info') }}', {
         method: 'POST',
         headers: {
             'Content-Type': 'application/x-www-form-urlencoded',
         },
-        body: `old_name=${encodeURIComponent(oldName)}&new_name=${encodeURIComponent(newName)}`
+        body: `video_path=${encodeURIComponent(currentVideoPath)}`
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            const content = document.getElementById('videoInfoContent');
+            content.innerHTML = `
+                <p><strong>Duración:</strong> ${data.duration}</p>
+                <p><strong>Tamaño:</strong> ${data.size}</p>
+                <p><strong>Ruta:</strong> ${data.path}</p>
+            `;
+        } else {
+            alert('Error al obtener la información del video: ' + data.message);
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        alert('Ocurrió un error al obtener la información del video');
+    });
+}
+
+function closeVideoInfoPopup() {
+    document.getElementById('videoInfoPopup').style.display = 'none';
+}
+
+function showTimeline() {
+    hideContextMenu({ target: document.body });
+    window.location.href = `{{ url_for('generate_timeline', filename='') }}${currentVideoPath}`;
+}
+
+function addVideoItemListeners(item) {
+    let touchStartX, touchStartY;
+    
+    item.addEventListener('contextmenu', function(e) {
+        e.preventDefault();
+        showContextMenu(e, this.dataset.path);
+    });
+
+    item.addEventListener('touchstart', function(e) {
+        touchStartX = e.touches[0].clientX;
+        touchStartY = e.touches[0].clientY;
+        longPressTimer = setTimeout(() => {
+            showContextMenu(e, this.dataset.path);
+        }, longPressDuration);
+    });
+
+    item.addEventListener('touchend', function(e) {
+        clearTimeout(longPressTimer);
+        const touchEndX = e.changedTouches[0].clientX;
+        const touchEndY = e.changedTouches[0].clientY;
+        const distance = Math.sqrt(Math.pow(touchEndX - touchStartX, 2) + Math.pow(touchEndY - touchStartY, 2));
+        if (distance < 10 && !contextMenuVisible) {
+            // Si el movimiento fue mínimo y el menú contextual no está visible, tratar como un clic
+            this.click();
+        }
+    });
+
+    item.addEventListener('touchmove', function(e) {
+        const touchMoveX = e.touches[0].clientX;
+        const touchMoveY = e.touches[0].clientY;
+        const distance = Math.sqrt(Math.pow(touchMoveX - touchStartX, 2) + Math.pow(touchMoveY - touchStartY, 2));
+        if (distance > 10) {
+            clearTimeout(longPressTimer);
+        }
+    });
+
+    item.addEventListener('click', function() {
+        // Deseleccionar cualquier otro elemento seleccionado
+        document.querySelectorAll('.video-item.bg-blue-100').forEach(function(selectedItem) {
+            selectedItem.classList.remove('bg-blue-100');
+        });
+        // Seleccionar el elemento actual
+        this.classList.add('bg-blue-100');
+    });
+}
+
+document.querySelectorAll('.video-item').forEach(addVideoItemListeners);
+
+document.getElementById('renameForm').addEventListener('submit', function(e) {
+    e.preventDefault();
+    const formData = new FormData(this);
+    fetch('{{ url_for('rename_video') }}', {
+        method: 'POST',
+        body: formData
     }).then(response => response.json())
     .then(data => {
         if (data.success) {
-            document.getElementById('renamePopup').style.display = 'none';
-            updateVideos();
+            location.reload();
         } else {
             alert('Error al renombrar el video: ' + data.message);
         }
@@ -154,33 +259,35 @@ function renameVideo(event) {
         console.error('Error:', error);
         alert('Ocurrió un error al renombrar el video');
     });
-}
+});
 
-function deleteVideo() {
-    if (confirm('¿Está seguro de que desea eliminar este video?')) {
-        fetch('{{ url_for('delete_video') }}', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/x-www-form-urlencoded',
-            },
-            body: `filename=${encodeURIComponent(currentVideoName)}`
-        }).then(response => response.json())
-        .then(data => {
-            if (data.success) {
-                hideContextMenu();
-                updateVideos();
-            } else {
-                alert('Error al eliminar el video: ' + data.message);
-            }
-        }).catch(error => {
-            console.error('Error:', error);
-            alert('Ocurrió un error al eliminar el video');
+function openVideoPopup(videoSrc) {
+    const popup = document.getElementById('videoPopup');
+    const video = document.getElementById('popupVideo');
+    video.src = videoSrc;
+    popup.style.display = 'block';
+    
+    // Forzar la carga del video antes de intentar reproducirlo
+    video.load();
+    
+    // Intentar reproducir el video después de un breve retraso
+    setTimeout(() => {
+        video.play().catch(error => {
+            console.error('Error al reproducir el video:', error);
+            // Si falla la reproducción automática, mostrar un mensaje al usuario
+            alert('No se pudo reproducir el video automáticamente. Por favor, intente reproducirlo manualmente.');
         });
+    }, 100);
+
+    // Marcar el video como visto
+    const videoItem = document.querySelector(`.video-item[data-path="${videoSrc.split('/').pop()}"]`);
+    if (videoItem) {
+        videoItem.classList.add('bg-blue-100');
     }
 }
 
 function updateVideos() {
-    fetch('{{ url_for('get_updated_videos') }}' + window.location.search)
+    fetch('{{ url_for('get_videos') }}')
         .then(response => response.json())
         .then(data => {
             const videoGrid = document.getElementById('videoGrid');
@@ -188,12 +295,12 @@ function updateVideos() {
             data.videos.forEach(video => {
                 const videoElement = document.createElement('div');
                 videoElement.className = 'bg-white shadow-md rounded-lg overflow-hidden relative video-item';
-                videoElement.dataset.name = video.nombre;
+                videoElement.setAttribute('data-path', video.nombre);
                 videoElement.innerHTML = `
                     <div class="p-4">
                         <h3 class="font-bold text-lg mb-2 truncate">${video.nombre}</h3>
                         ${video.vista_previa ? 
-                            `<img src="{{ url_for('serve_preview', filename='') }}${video.vista_previa}" alt="Vista previa de ${video.nombre}" class="w-full h-32 object-cover mb-2 cursor-pointer" onclick="openVideoPopup('${video.nombre}')">` :
+                            `<img src="data:image/jpeg;base64,${video.vista_previa}" alt="Vista previa de ${video.nombre}" class="w-full h-32 object-cover mb-2 cursor-pointer" onclick="openVideoPopup('${video.url}')">` :
                             `<div class="w-full h-32 bg-gray-200 flex items-center justify-center mb-2">
                                 <span class="text-gray-500">Vista previa no disponible</span>
                             </div>`
@@ -203,69 +310,13 @@ function updateVideos() {
                     </div>
                 `;
                 videoGrid.appendChild(videoElement);
-                
-                if (video.nombre === currentVideoName) {
-                    selectVideo(videoElement);
-                }
+                addVideoItemListeners(videoElement);
             });
-            
-            updateEventListeners();
-            updatePagination(data.total_pages);
-        });
+        })
+        .catch(error => console.error('Error:', error));
 }
 
-function updateEventListeners() {
-    document.querySelectorAll('.video-item').forEach(item => {
-        item.addEventListener('click', function() {
-            selectVideo(this);
-        });
-
-        item.addEventListener('contextmenu', function(e) {
-            e.preventDefault();
-            showContextMenu(e, this.dataset.name);
-        });
-
-        item.addEventListener('touchstart', function(e) {
-            longPressTimer = setTimeout(() => {
-                showContextMenu(e, this.dataset.name);
-            }, longPressDuration);
-        });
-
-        item.addEventListener('touchend', function() {
-            clearTimeout(longPressTimer);
-        });
-
-        item.addEventListener('touchmove', function() {
-            clearTimeout(longPressTimer);
-        });
-    });
-}
-
-function updatePagination(totalPages) {
-    const paginationElement = document.getElementById('pagination');
-    // Actualizar la paginación aquí si es necesario
-}
-
-function openVideoPopup(videoName) {
-    const popup = document.getElementById('videoPopup');
-    const video = document.getElementById('popupVideo');
-    video.src = `{{ url_for('serve_video', filename='') }}${videoName}`;
-    popup.style.display = 'block';
-    
-    video.load();
-    
-    setTimeout(() => {
-        video.play().catch(error => {
-            console.error('Error al reproducir el video:', error);
-            alert('No se pudo reproducir el video automáticamente. Por favor, intente reproducirlo manualmente.');
-        });
-    }, 100);
-}
-
-// Actualizar videos automáticamente cada 30 segundos
+// Actualizar videos cada 30 segundos
 setInterval(updateVideos, 30000);
-
-// Inicializar los event listeners
-updateEventListeners();
 </script>
 {% endblock %}

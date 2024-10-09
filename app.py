@@ -290,5 +290,5 @@ def cleanup_temp_dir():
 
 if __name__ == '__main__':
     generate_all_previews()  # Generar todas las vistas previas al iniciar
-    app.run(debug=True)
+    app.run(debug=False, host='0.0.0.0')
     atexit.register(cleanup_temp_dir)  # Limpiar el directorio temporal al cerrar la aplicación

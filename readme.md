@@ -17,6 +17,7 @@ Este proyecto es un sistema de gestión de videos ONVIF desarrollado con Flask. 
 - Python 3.10+
 - Flask
 - OpenCV
+- - Ffmpeg (apt install ffmpeg)
 - Otras dependencias listadas en `requirements.txt`
 
 ## Instalación

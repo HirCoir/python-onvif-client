@@ -75,16 +75,14 @@ def listar_videos(page=1):
         for filename in files:
             if filename.lower().endswith(('.mp4', '.avi', '.mov')):
                 file_path = os.path.join(root, filename)
-                absolute_path = os.path.abspath(file_path)
+                relative_path = os.path.relpath(file_path, config.DIRECTORIO_VIDEOS)
                 file_size = os.path.getsize(file_path)
                 vista_previa = generar_vista_previa(file_path)
                 videos.append({
-                    'nombre': filename,
-                    'ruta_absoluta': absolute_path,
+                    'nombre': relative_path,
                     'tamaño': file_size,
                     'fecha_modificacion': datetime.fromtimestamp(os.path.getmtime(file_path)).strftime('%Y-%m-%d %H:%M:%S'),
-                    'vista_previa': vista_previa,
-                    'url': url_for('serve_video', filename=os.path.relpath(file_path, config.DIRECTORIO_VIDEOS))
+                    'vista_previa': vista_previa
                 })
     
     videos.sort(key=lambda x: x['fecha_modificacion'], reverse=True)
@@ -99,13 +97,6 @@ def index():
     page = request.args.get('page', 1, type=int)
     videos, total_pages = listar_videos(page)
     return render_template('dashboard.html', videos=videos, page=page, total_pages=total_pages)
-
-@app.route('/get_videos')
-@login_required
-def get_videos():
-    page = request.args.get('page', 1, type=int)
-    videos, total_pages = listar_videos(page)
-    return jsonify({'videos': videos, 'total_pages': total_pages})
 
 @app.route('/login', methods=['GET', 'POST'])
 def login():
@@ -351,34 +342,6 @@ def stop_recording():
     flash(f'Grabación detenida para {camera_name}', 'success')
     return redirect(url_for('recording'))
 
-@app.route('/get_video_info', methods=['POST'])
-@login_required
-def get_video_info():
-    video_path = request.form['video_path']
-    full_path = os.path.join(config.DIRECTORIO_VIDEOS, video_path)
-    
-    if not os.path.exists(full_path):
-        return jsonify({'success': False, 'message': 'El archivo de video no existe'}), 404
-    
-    try:
-        # Obtener información del video usando ffprobe
-        result = subprocess.run(['ffprobe', '-v', 'quiet', '-print_format', 'json', '-show_format', '-show_streams', full_path],
-                                capture_output=True, text=True)
-        video_info = json.loads(result.stdout)
-        
-        # Extraer la información relevante
-        duration = float(video_info['format']['duration'])
-        size = int(video_info['format']['size'])
-        
-        return jsonify({
-            'success': True,
-            'duration': f"{duration:.2f} segundos",
-            'size': f"{size / (1024 * 1024):.2f} MB",
-            'path': full_path
-        })
-    except Exception as e:
-        return jsonify({'success': False, 'message': f"Error al obtener información del video: {str(e)}"}), 500
-
 def capture_camera_preview(camera_url):
     try:
         cap = cv2.VideoCapture(camera_url)
@@ -495,59 +458,6 @@ def check_recording_processes():
                     del recording_processes[process_id]
         
         time.sleep(10)  # Verificar cada 10 segundos
-
-@app.route('/generate_timeline/<path:filename>')
-@login_required
-def generate_timeline(filename):
-    video_path = os.path.join(config.DIRECTORIO_VIDEOS, filename)
-    if not os.path.exists(video_path):
-        abort(404)
-
-    # Crear un directorio temporal para los frames
-    temp_dir = os.path.join(config.DIRECTORIO_VIDEOS, 'temp_frames', os.path.splitext(filename)[0])
-    os.makedirs(temp_dir, exist_ok=True)
-
-    # Generar frames
-    cap = cv2.VideoCapture(video_path)
-    fps = cap.get(cv2.CAP_PROP_FPS)
-    total_frames = int(cap.get(cv2.CAP_PROP_FRAME_COUNT))
-    duration = total_frames / fps
-
-    frames = []
-    for i in range(0, total_frames, int(fps)):  # Capturar un frame por segundo
-        cap.set(cv2.CAP_PROP_POS_FRAMES, i)
-        ret, frame = cap.read()
-        if ret:
-            frame_filename = f"frame_{i}.jpg"
-            frame_path = os.path.join(temp_dir, frame_filename)
-            cv2.imwrite(frame_path, frame)
-            frames.append({
-                'path': os.path.join('temp_frames', os.path.splitext(filename)[0], frame_filename),
-                'time': i / fps
-            })
-
-    cap.release()
-
-    return render_template('timeline.html', video_filename=filename, frames=frames, duration=duration)
-
-@app.route('/get_timeline_frames/<path:filename>')
-@login_required
-def get_timeline_frames(filename):
-    video_path = os.path.join(config.DIRECTORIO_VIDEOS, filename)
-    if not os.path.exists(video_path):
-        abort(404)
-
-    temp_dir = os.path.join(config.DIRECTORIO_VIDEOS, 'temp_frames', os.path.splitext(filename)[0])
-    frames = []
-    for frame_file in sorted(os.listdir(temp_dir)):
-        if frame_file.endswith('.jpg'):
-            frame_number = int(frame_file.split('_')[1].split('.')[0])
-            frames.append({
-                'path': os.path.join('temp_frames', os.path.splitext(filename)[0], frame_file),
-                'time': frame_number / 30  # Asumiendo 30 FPS, ajusta según sea necesario
-            })
-
-    return jsonify(frames)
 
 if __name__ == '__main__':
     # Crear el directorio de videos si no existe
